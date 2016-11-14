@@ -23,11 +23,20 @@ cp production/pARun2016ForestingSetup_v0/* .
 cmsRun runForestAOD_pPb_DATA_80X.py outputFile=HiForest_test.root maxEvents=2 inputFiles=root://eoscms//eos/cms/store/express/PARun2016A/ExpressPhysicsPA/FEVT/Express-v1/000/284/755/00000/08BA510B-D6A4-E611-84C9-02163E0141DE.root
 ```
 
-## Submit one (streamer or express) run to caf queue
+## Submit one streamer run to caf queue
+
+This needs a fresh checkout of CMSSW_8_0_23 independent of the forest - there are conflicts in the reco script if you use the same CMSSW_BASE as the forest.  Instead do, from a clean area:
+```bash
+cmsrel CMSSW_8_0_23
+```
+then change the path of L56 in submitForestStreamer.py to correspond with the path of the new checked out 8_0_23 release.  Once this is setup, and your streamer RECO script has been created (see bottom of this README), you can forest streamers on the batch farm:
 ```bash
 ## NOTE - The streamers need to be RECOed also - see instructions at the bottom of this README to get the reco cfg...
 python submitForestStreamer.py -q cmscaf1nd -o /store/group/phys_heavyions/kjung/StreamerForests/v1 -i ExpressPA.284755.v1.txt
+```
 
+## Submit one express run to the caf queue
+```bash
 python submitForestExpress.py -q cmscaf1nd -o /store/group/phys_heavyions/kjung/ExpressForests/v1 -i ExpressForest_284755_v1.txt
 ```
 
