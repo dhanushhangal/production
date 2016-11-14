@@ -8,7 +8,7 @@ cmsrel CMSSW_8_0_23
 cd CMSSW_8_0_23/src
 cmsenv
 # Main forest
-git cms-merge-topic -u CmsHI:forest_$CMSSW_VERSION
+git cms-merge-topic -u CmsHI:forest_CMSSW_8_0_22
 # Dfinder
 git clone -b Dfinder https://github.com/taweiXcms/Bfinder.git
 git clone git@github.com:kurtejung/production.git
@@ -20,29 +20,22 @@ cp production/pARun2016ForestingSetup_v0/* .
 
 ## Run interactively:
 ```bash
-cmsRun runOpenHLT_pp_DATA_75X_Express.py outputFile=openHLT.root maxEvents=10 inputFiles=/store/express/Run2015E/ExpressPhysics/FEVT/Express-v1/000/262/163/00000/C4717393-ED8E-E511-9F65-02163E0120F9.root
-
-cmsRun runForest_pp_DATA_75X_Express.py outputFile=test.root maxEvents=10 inputFiles=/store/express/Run2015E/ExpressPhysics/FEVT/Express-v1/000/262/163/00000/C4717393-ED8E-E511-9F65-02163E0120F9.root
+cmsRun runForestAOD_pPb_DATA_80X.py outputFile=HiForest_test.root maxEvents=2 inputFiles=root://eoscms//eos/cms/store/express/PARun2016A/ExpressPhysicsPA/FEVT/Express-v1/000/284/755/00000/08BA510B-D6A4-E611-84C9-02163E0141DE.root
 ```
 
-## Submit one run to caf queue
+## Submit one (streamer or express) run to caf queue
 ```bash
-python submitOpenHLTExpress.py -q cmscaf1nd -o /store/group/phys_heavyions/velicanu/openhlt/Run2015E/ExpressPhysics/FEVT/ -i ExpressPhysics.262163.v2.list
+## NOTE - The streamers need to be RECOed also - see instructions at the bottom of this README to get the reco cfg...
+python submitForestStreamer.py -q cmscaf1nd -o /store/group/phys_heavyions/kjung/StreamerForests/v1 -i ExpressPA.284755.v1.txt
 
-python submitForestExpress.py -q cmscaf1nd -o /store/group/phys_heavyions/velicanu/forest/Run2015E/ExpressPhysics/FEVT/v2/ -i ExpressPhysics.262163.v2.list --proxy=proxyforprod
+python submitForestExpress.py -q cmscaf1nd -o /store/group/phys_heavyions/kjung/ExpressForests/v1 -i ExpressForest_284755_v1.txt
 ```
 
-## Submit all runs in 'runstoprocess' to caf queue
+## Submit all runs in 'expressrunstoprocess' to caf queue
 ```bash
-./suballruns.sh v6
+./hit0suballruns.sh 1
 ```
-
-## Submit PbPb forest on AOD
-
-```bash
-# you will need to set set cmscaf1nd to 1nd if you don't have caf permission, set the -o option to your own eos directory, and set -i to a file that looks like HIMinimumBias2.AOD.list but for the data you want to run on
-python submitHIForestAOD.py -q cmscaf1nd -o /store/group/phys_heavyions/velicanu/forest/HIRun2015/HIMinimumBias2/AOD/ -i HIMinimumBias2.AOD.list --proxy=proxyforprod &> HIMinimumBias2.AOD.list.log &
-```
+this will also append the runs in 'expressrunstoprocess' to 'allruns' for bookkeeping
 
 
 ##############################################################
@@ -50,17 +43,17 @@ python submitHIForestAOD.py -q cmscaf1nd -o /store/group/phys_heavyions/velicanu
 ## How to run RECO on streamer (raw) files
 
 ```bash
-cmsrel CMSSW_7_5_7_patch1
-cd CMSSW_7_5_7_patch1/src
+cmsrel CMSSW_8_0_23
+cd CMSSW_8_0_23/src
 cmsenv
 git cms-addpkg Configuration/DataProcessing
 scram build -j8
-git clone git@github.com:velicanu/production.git
-cp production/HIRun2015ForestingSetup_v0/submitRunExpressProcessingCfg.py Configuration/DataProcessing/test/
+git clone git@github.com:kurtejung/production.git
+cp production/pARun2016ForestingSetup_v0/submitRunExpressProcessingCfg.py Configuration/DataProcessing/test/
 cd Configuration/DataProcessing/test/
 
-# you can look in run_CfgTest.sh to see different running configuration, I will show how to do Express PbPb on DAT
-python RunExpressProcessing.py --scenario HeavyIonsRun2 --global-tag 75X_dataRun2_ExpressHI_v2 --lfn /some/path/ --fevt --alcareco TkAlMinBiasHI+SiStripCalMinBias
+# you can look in run_CfgTest.sh to see different running configuration, I will show how to do Express pPb on DATA
+python RunExpressProcessing.py --scenario ppEra_Run2_2016_pA --global-tag 80X_dataRun2_Express_v15 --lfn /some/path/ --fevt
 ```
 This will generate a RunExpressProcessingCfg.py config, make the following changes:
 ```python
@@ -99,13 +92,13 @@ process.maxEvents = cms.untracked.PSet(
 
 You can test if the changes are properly made by trying the follwoing:
 ```bash
-RunExpressProcessingCfg.py outputFile=step3_0.root maxEvents=3 inputFiles=root://cms-xrd-global.cern.ch//eos/cms/store/t0streamer/Data/HIPhysicsMinBiasUPC/000/262/548/run262548_ls0118_streamHIPhysicsMinBiasUPC_StorageManager.dat
+cmsRun RunExpressProcessingCfg.py outputFile=step3_0.root maxEvents=3 inputFiles=root://eoscms//eos/cms/store/t0streamer/Data/ExpressPA/000/285/216/run285216_ls0045_streamExpressPA_StorageManager.dat
 ```
 
 Now you're ready to submit, to do that:
 ```bash
 # the second time you run this add --proxy=proxyforprod to the following command , also set the outputpath/username
-python submitRunExpressProcessingCfg.py -q cmscaf1nd -o /store/group/phys_heavyions/YOURUSERNAME/reco/HIPhysicsMinBiasUPC/v0/ -i HIPhysicsMinBiasUPC.262548.list 
+python submitForestStreamer.py -q cmscaf1nd -o /store/group/phys_heavyions/kjung/StreamerForests/v1 -i ExpressPA.284755.v1.txt --proxy=proxyforprod
 ```
 
 That's it! bjobs to check job status and look in the path for those  /store/group/phys_heavyions/YOURUSERNAME/reco/HIPhysicsMinBiasUPC/v0/
