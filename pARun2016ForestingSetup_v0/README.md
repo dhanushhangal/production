@@ -29,7 +29,9 @@ This needs a fresh checkout of CMSSW_8_0_23 independent of the forest - there ar
 ```bash
 cmsrel CMSSW_8_0_23
 ```
-then change the path of L56 in submitForestStreamer.py to correspond with the path of the new checked out 8_0_23 release.  Once this is setup, and your streamer RECO script has been created (see bottom of this README), you can forest streamers on the batch farm:
+then change the path of L56 in submitForestStreamer.py to correspond with the path of the new checked out 8_0_23 release.  
+!! MAKE SURE you cmsenv in your FOREST release though - NOT the new fresh release or else the scripts will not work!
+Once this is setup, and your streamer RECO script has been created (see bottom of this README), you can forest streamers on the batch farm:
 ```bash
 ## NOTE - The streamers need to be RECOed also - see instructions at the bottom of this README to get the reco cfg...
 python submitForestStreamer.py -q cmscaf1nd -o /store/group/phys_heavyions/kjung/StreamerForests/v1 -i ExpressPA.284755.v1.txt
