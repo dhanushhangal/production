@@ -10,7 +10,7 @@ cmsenv
 # Main forest
 git cms-merge-topic -u CmsHI:forest_CMSSW_8_0_22
 # Dfinder
-git clone -b Dfinder https://github.com/taweiXcms/Bfinder.git
+git clone -b test80forpPb https://github.com/taweiXcms/Bfinder.git
 git clone git@github.com:kurtejung/production.git
 scram build -j8
 
